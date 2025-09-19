@@ -1,4 +1,4 @@
-package org.example;
+package org.example.models;
 
 public class CourierCredentials {
     private String login;
@@ -9,7 +9,6 @@ public class CourierCredentials {
         this.password = password;
     }
 
-    // Геттеры и сеттеры
     public String getLogin() {
         return login;
     }

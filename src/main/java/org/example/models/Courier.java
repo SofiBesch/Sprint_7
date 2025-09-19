@@ -1,4 +1,4 @@
-package org.example;
+package org.example.models;
 
 public class Courier {
     private String login;
@@ -37,7 +37,4 @@ public class Courier {
     public void setId(Integer id) {
         this.id = id;
     }
-
-
-
 }
