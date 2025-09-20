@@ -1,11 +1,12 @@
-import io.qameta.allure.Step;
+import io.qameta.allure.Description;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.ResponseLoggingFilter;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.example.models.Courier;
 import org.example.models.CourierCredentials;
-import org.example.models.CourierSteps;
+import org.example.models.CourierStepsAndOrderSteps;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,10 +14,10 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.*;
 
 public class CourierTests {
-    private CourierSteps courierSteps = new CourierSteps();
+    private CourierStepsAndOrderSteps courierSteps = new CourierStepsAndOrderSteps();
     private Courier courier;
     private Integer courierId;
-
+    private boolean courierCreated = false;
 
     @Before
     public void setUp() {
@@ -26,43 +27,33 @@ public class CourierTests {
         courier.setPassword(RandomStringUtils.randomAlphabetic(12));
     }
     //тест 1 - создание курьера
-
+    @DisplayName("Тестирование создания курьера")
+    @Description("Проверка возможности создать курьера")
     @Test
     public void shouldCreateCourierTest(){
             courierSteps
                     .createCourier(courier)
                 .statusCode(201)
                 .body("ok", is(true));
+        courierCreated = true;
     }
-    //тест 2 - курьера авторизовать можно
 
-    @Test
-    public void shouldLoginCourierTest(){
-            courierSteps
-                .createCourier(courier);
-            CourierCredentials credentials = new CourierCredentials(
-                courier.getLogin(),
-                courier.getPassword()
-            );
-            courierSteps
-                .login(credentials)
-                .statusCode(200)
-                .body("id", notNullValue());
-    }
-    //тест 3 - нельзя создать двух одинаковых курьеров
-
+    //тест 2 - нельзя создать двух одинаковых курьеров
+    @DisplayName("Тестирование создания двух одинаковых курьеров")
+    @Description("Проверка возникновения ошибки при создании двух одинаковых курьеров")
     @Test
     public void shouldNotCreateDuplicateCourier(){
-        // Первое создание
-        courierSteps.createCourier(courier);
 
-        // Второе создание с теми же данными
+        courierSteps.createCourier(courier);
+        courierCreated = true;
+
         courierSteps.createCourier(courier)
                 .statusCode(409)
                 .body("message", equalTo("Этот логин уже используется. Попробуйте другой."));
     }
-    // тест 4 - обязательные поля - без логина
-
+    // тест 3 - обязательные поля - без логина
+    @DisplayName("Тестирование обязательных полей для создания курьера - без логина")
+    @Description("Проверка возникновения ошибки при создании курьера - отсутствие данных в поле login")
     @Test
     public void shouldNotCreateCourierWithoutLogin(){
         Courier invalidCourier = new Courier();
@@ -74,8 +65,9 @@ public class CourierTests {
                 .body("message", equalTo("Недостаточно данных для создания учетной записи"));
     }
 
-    // тест 5 - обязательные поля - без пароля
-
+    // тест 4 - обязательные поля - без пароля
+    @DisplayName("Тестирование обязательных полей для создания курьера - без логина")
+    @Description("Проверка возникновения ошибки при создании курьера - отсутствие данных в поле password")
     @Test
     public void shouldNotCreateCourierWithoutPassword(){
         Courier invalidCourier = new Courier();
@@ -87,62 +79,26 @@ public class CourierTests {
                 .body("message", equalTo("Недостаточно данных для создания учетной записи"));
     }
 
-    // тест 6 - ошибка при неправильном пароле
-
-    @Test
-    public void shouldNotLoginWithWrongPassword(){
-        courierSteps.createCourier(courier);
-
-        CourierCredentials wrongCredentials = new CourierCredentials(
-                courier.getLogin(),
-                "wrong_password"
-        );
-
-        courierSteps.login(wrongCredentials)
-                .statusCode(404)
-                .body("message", equalTo("Учетная запись не найдена"));
-    }
-
-    // тест 7 - ошибка при несуществующем пользователе
-
-    @Test
-    public void shouldNotLoginNonExistentUser(){
-        CourierCredentials nonExistent = new CourierCredentials(
-                "nonexistent",
-                "password"
-        );
-
-        courierSteps.login(nonExistent)
-                .statusCode(404)
-                .body("message", equalTo("Учетная запись не найдена"));
-    }
-
-    // тест 8 - обязательные поля для логина - пароль
-
-    @Test
-    public void shouldNotLoginWithoutPassword(){
-        courierSteps.loginWithoutPassword(courier.getLogin())
-                .statusCode(400)
-                .body("message", equalTo("Недостаточно данных для входа"));
-    }
     @After
     public void tearDown(){
-        try {
-            //
-            CourierCredentials credentials = new CourierCredentials(
-                    courier.getLogin(),
-                    courier.getPassword()
-            );
+        if (courierCreated) {
+            try {
+                //
+                CourierCredentials credentials = new CourierCredentials(
+                        courier.getLogin(),
+                        courier.getPassword()
+                );
 
-            courierId = courierSteps.login(credentials)
-                    .extract().body().path("id");
+                courierId = courierSteps.login(credentials)
+                        .extract().body().path("id");
 
-            if (courierId != null) {
-                courierSteps.deleteCourier(courierId);
+                if (courierId != null) {
+                    courierSteps.deleteCourier(courierId)
+                            .statusCode(200);;
+                }
+            } catch (Exception e) {
+
             }
-        } catch (Exception e) {
-
         }
-
     }
 }

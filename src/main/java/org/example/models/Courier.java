@@ -6,6 +6,9 @@ public class Courier {
     private String firstName;
     private Integer id;
 
+    public Courier() {
+    }
+
     public String getLogin() {
         return login;
     }

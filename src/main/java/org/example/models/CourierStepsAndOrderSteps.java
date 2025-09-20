@@ -1,20 +1,19 @@
 package org.example.models;
-
+import com.google.gson.Gson;
 import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
-import java.util.HashMap;
-import java.util.Map;
 import io.qameta.allure.Step;
 import static io.restassured.RestAssured.given;
 
 
-public class CourierSteps {
+public class CourierStepsAndOrderSteps {
+    private Gson gson = new Gson();
     @Step("Создание курьера")
     public ValidatableResponse createCourier(Courier courier){
         return given()
                 .contentType(ContentType.JSON)
                 .baseUri("https://qa-scooter.praktikum-services.ru/")
-                .body(courier)
+                .body(gson.toJson(courier))
                 .when()
                 .post("/api/v1/courier")
                 .then();
@@ -24,7 +23,7 @@ public class CourierSteps {
         return given()
                 .contentType(ContentType.JSON)
                 .baseUri("https://qa-scooter.praktikum-services.ru/")
-                .body(credentials)
+                .body(gson.toJson(credentials))
                 .when()
                 .post("/api/v1/courier/login")
                 .then();
@@ -41,13 +40,13 @@ public class CourierSteps {
     }
     @Step("Авторизация без пароля")
     public ValidatableResponse loginWithoutPassword(String login){
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("login", login);
+        CourierCredentials credentials = new CourierCredentials();
+        credentials.setLogin(login);
 
         return given()
                 .contentType(ContentType.JSON)
                 .baseUri("https://qa-scooter.praktikum-services.ru/")
-                .body(requestBody)
+                .body(gson.toJson(credentials))
                 .when()
                 .post("/api/v1/courier/login")
                 .then();
@@ -57,7 +56,7 @@ public class CourierSteps {
         return given()
                 .contentType(ContentType.JSON)
                 .baseUri("https://qa-scooter.praktikum-services.ru/")
-                .body(order)
+                .body(gson.toJson(order))
                 .when()
                 .post("/api/v1/orders")
                 .then();
@@ -89,9 +88,21 @@ public class CourierSteps {
         return given()
                 .contentType(ContentType.JSON)
                 .baseUri("https://qa-scooter.praktikum-services.ru/")
-                .body(Map.of("track", track))
                 .when()
-                .put("/api/v1/orders/cancel")
+                .delete("/api/v1/orders/track/" + track)  // Правильный метод DELETE
+                .then();
+    }
+    @Step("Авторизация без логина")
+    public ValidatableResponse loginWithoutLogin(String password) {
+        CourierCredentials credentials = new CourierCredentials();
+        credentials.setPassword(password);
+
+        return given()
+                .contentType(ContentType.JSON)
+                .baseUri("https://qa-scooter.praktikum-services.ru/")
+                .body(gson.toJson(credentials))
+                .when()
+                .post("/api/v1/courier/login")
                 .then();
     }
 }

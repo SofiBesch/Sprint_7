@@ -1,3 +1,5 @@
+import io.qameta.allure.Description;
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import org.example.models.CourierStepsAndOrderSteps;
@@ -16,12 +18,13 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
 
 @RunWith(Parameterized.class)
-public class OrderTests {
+public class OrderTestsCreation {
     private CourierStepsAndOrderSteps courierSteps = new CourierStepsAndOrderSteps();
     private Order order;
     private List<String> colors;
+    private Integer track;
 
-    public OrderTests(List<String> colors) {
+    public OrderTestsCreation(List<String> colors) {
         this.colors = colors;
     }
 
@@ -53,41 +56,22 @@ public class OrderTests {
     }
 
     //    Тестирование создания заказа с разными цветами
+    @DisplayName("Тестирование создания заказа с разными цветами")
+    @Description("Проверка возможности создания заказа с разными цветами самоката")
     @Test
     public void shouldCreateOrderWithDifferentColorsTest() {
         courierSteps.createOrder(order)
                 .statusCode(201)
-                .body("track", notNullValue());
+                .body("track", notNullValue())
+                .extract().body().path("track");;
     }
 
-    //    Тестирование получения списка заказов
-    @Test
-    public void shouldGetOrdersListTest() {
-
-        Integer track = courierSteps.createOrder(order)
-                .extract().body().path("track");
-
-        courierSteps.getOrdersList()
-                .statusCode(200)
-                .body("orders", notNullValue())
-                .body("orders.size()", greaterThan(0));
-
-        if (track != null) {
-            courierSteps.cancelOrder(track);
-        }
-    }
-
-    //    Тестирование получения списка заказов с лимитом
-    @Test
-    public void shouldGetOrdersListWithLimitTest() {
-        courierSteps.getOrdersListWithLimit(5)
-                .statusCode(200)
-                .body("orders", notNullValue())
-                .body("orders.size()", lessThanOrEqualTo(5));
-    }
 
     @After
     public void tearDown() {
-
+        if (track != null) {
+            courierSteps.cancelOrder(track)
+                    .statusCode(200);
+        }
     }
 }

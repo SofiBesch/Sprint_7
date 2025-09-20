@@ -33,7 +33,7 @@ public class Order {
         this.color = color;
     }
 
-    // Геттеры и сеттеры
+
     public String getFirstName() {
         return firstName;
     }
