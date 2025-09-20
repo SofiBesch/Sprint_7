@@ -1,7 +1,6 @@
-import io.qameta.allure.Step;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.ResponseLoggingFilter;
-import org.example.models.CourierSteps;
+import org.example.models.CourierStepsAndOrderSteps;
 import org.example.models.Order;
 import org.junit.After;
 import org.junit.Before;
@@ -18,7 +17,7 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
 @RunWith(Parameterized.class)
 public class OrderTests {
-    private CourierSteps courierSteps = new CourierSteps();
+    private CourierStepsAndOrderSteps courierSteps = new CourierStepsAndOrderSteps();
     private Order order;
     private List<String> colors;
 
@@ -53,7 +52,7 @@ public class OrderTests {
         );
     }
 
-//    Тестирование создания заказа с разными цветами
+    //    Тестирование создания заказа с разными цветами
     @Test
     public void shouldCreateOrderWithDifferentColorsTest() {
         courierSteps.createOrder(order)
@@ -61,7 +60,7 @@ public class OrderTests {
                 .body("track", notNullValue());
     }
 
-//    Тестирование получения списка заказов
+    //    Тестирование получения списка заказов
     @Test
     public void shouldGetOrdersListTest() {
 
@@ -78,7 +77,7 @@ public class OrderTests {
         }
     }
 
-//    Тестирование получения списка заказов с лимитом
+    //    Тестирование получения списка заказов с лимитом
     @Test
     public void shouldGetOrdersListWithLimitTest() {
         courierSteps.getOrdersListWithLimit(5)
