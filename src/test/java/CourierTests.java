@@ -1,7 +1,5 @@
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
-import io.restassured.filter.log.ResponseLoggingFilter;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.example.models.Courier;
@@ -21,7 +19,7 @@ public class CourierTests {
 
     @Before
     public void setUp() {
-        RestAssured.filters(new ResponseLoggingFilter(), new ResponseLoggingFilter());
+
         courier = new Courier();
         courier.setLogin(RandomStringUtils.randomAlphabetic(12));
         courier.setPassword(RandomStringUtils.randomAlphabetic(12));

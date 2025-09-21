@@ -1,7 +1,6 @@
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
-import io.restassured.filter.log.ResponseLoggingFilter;
+
 import org.example.models.CourierStepsAndOrderSteps;
 import org.example.models.Order;
 import org.junit.After;
@@ -19,7 +18,7 @@ public class OrderListTest {
 
     @Before
     public void setUp() {
-        RestAssured.filters(new ResponseLoggingFilter(), new ResponseLoggingFilter());
+
 
         order = new Order(
                 "Владимир",
@@ -32,6 +31,9 @@ public class OrderListTest {
                 "Комментарий к заказу",
                 Arrays.asList("BLACK")
         );
+        track = courierSteps.createOrder(order)
+                .statusCode(201)
+                .extract().body().path("track");
     }
     //    1  получения списка заказов
     @DisplayName("Тестирование получения списка заказов")
@@ -39,9 +41,7 @@ public class OrderListTest {
     @Test
     public void shouldGetOrdersListTest() {
 
-        track = courierSteps.createOrder(order)
-                .statusCode(201)
-                .extract().body().path("track");
+
 
         courierSteps.getOrdersList()
                 .statusCode(200)
@@ -55,9 +55,7 @@ public class OrderListTest {
     @Description("Проверка возможности получения списка заказов с лимитом")
     @Test
     public void shouldGetOrdersListWithLimitTest() {
-        track = courierSteps.createOrder(order)
-                .statusCode(201)
-                .extract().body().path("track");
+
         courierSteps.getOrdersListWithLimit(5)
                 .statusCode(200)
                 .body("orders", notNullValue())

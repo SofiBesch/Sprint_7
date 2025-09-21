@@ -1,7 +1,7 @@
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
-import io.restassured.filter.log.ResponseLoggingFilter;
+
+import io.restassured.response.ValidatableResponse;
 import org.example.models.CourierStepsAndOrderSteps;
 import org.example.models.Order;
 import org.junit.After;
@@ -13,8 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
+
 
 
 @RunWith(Parameterized.class)
@@ -23,6 +22,8 @@ public class OrderTestsCreation {
     private Order order;
     private List<String> colors;
     private Integer track;
+    private ValidatableResponse createOrderResponse;
+
 
     public OrderTestsCreation(List<String> colors) {
         this.colors = colors;
@@ -40,7 +41,7 @@ public class OrderTestsCreation {
 
     @Before
     public void setUp() {
-        RestAssured.filters(new ResponseLoggingFilter(), new ResponseLoggingFilter());
+
 
         order = new Order(
                 "Владимир",
@@ -53,6 +54,9 @@ public class OrderTestsCreation {
                 "Комментарий к заказу",
                 colors
         );
+
+        createOrderResponse = courierSteps.createOrder(order);
+        track = createOrderResponse.extract().path("track");
     }
 
     //    Тестирование создания заказа с разными цветами
@@ -60,18 +64,16 @@ public class OrderTestsCreation {
     @Description("Проверка возможности создания заказа с разными цветами самоката")
     @Test
     public void shouldCreateOrderWithDifferentColorsTest() {
-        courierSteps.createOrder(order)
+        createOrderResponse
                 .statusCode(201)
-                .body("track", notNullValue())
-                .extract().body().path("track");;
+                .body("track", notNullValue());
     }
 
 
     @After
     public void tearDown() {
         if (track != null) {
-            courierSteps.cancelOrder(track)
-                    .statusCode(200);
+            courierSteps.cancelOrder(track);
         }
     }
 }
